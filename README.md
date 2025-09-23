@@ -1,2 +1,2 @@
-# primus-universam
-primus evolution
+# primus-universum
+evolution of primus
