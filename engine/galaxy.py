@@ -2,41 +2,31 @@ import random
 
 class GalaxyUniverse:
     """
-    The Primus galaxy: holds orbits, planets, and moons.
-    Genesis map structure:
-    {
-        "Science": {
-            "Physics": ["Quantum", "Relativity"],
-            "Biology": ["Genetics", "Neuroscience"]
-        },
-        "Technology": {
-            "AI": ["LLMs", "NeuralNets"],
-            "Energy": ["Solar", "Fusion"]
-        }
-    }
+    Represents the Primus Universe structure — orbits, planets, and moons.
+    Random paths are used to simulate recursive traversals during pulse cycles.
     """
 
-    def __init__(self, genesis_map: dict):
-        self.map = genesis_map
+    def __init__(self, map_data):
+        self.map = map_data or {}
 
     def random_path(self):
         """
-        Returns a random (orbit, planet, moon) tuple.
+        Randomly selects an orbit → planet → moon path from the Genesis map.
+        Includes fallback values if data is missing or incomplete.
         """
-        if not self.map:
-            return ("Void", "None", "None")
-
-        orbit = random.choice(list(self.map.keys()))
-        planets = self.map[orbit]
-
+        planets = self.map.get("planets", {})
         if not planets:
-            return (orbit, "None", "None")
+            # fallback if planets are missing
+            return "Void", "NoPlanet", "NoMoon"
 
         planet = random.choice(list(planets.keys()))
-        moons = planets[planet]
+        orbits = self.map.get("orbits", {})
+        moons = self.map.get("moons", {})
 
-        if not moons:
-            return (orbit, planet, "None")
+        orbit = orbits.get(planet, "UnknownOrbit")
+        moon_list = moons.get(planet, ["NoMoon"])
 
-        moon = random.choice(moons)
-        return (orbit, planet, moon)
+        # Choose a moon safely
+        moon = random.choice(moon_list) if moon_list else "NoMoon"
+
+        return orbit, planet, moon
