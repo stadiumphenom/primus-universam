@@ -1,0 +1,24 @@
+name: Reorganize Repo
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Run reorganizer
+        run: python reorganize_repo.py
+      - name: Commit changes
+        run: |
+          git config --global user.name 'primus-bot'
+          git config --global user.email 'primus-bot@example.com'
+          git add -A
+          git commit -m "Auto-reorganized repo" || echo "No changes"
+          git push
