@@ -2,91 +2,25 @@
   "core": "Primus",
   "galaxies": {
     "Science": {
-      "Physics": [
-        "Gravity",
-        "Thermodynamics",
-        "Relativity",
-        "Quantum"
-      ],
-      "Chemistry": [
-        "Bonds",
-        "Reactions",
-        "States",
-        "Catalysis"
-      ],
-      "Biology": [
-        "Evolution",
-        "Neural Systems",
-        "Immune Systems",
-        "Ecology"
-      ],
-      "Mathematics": [
-        "Algebra",
-        "Geometry",
-        "Topology",
-        "Fractals",
-        "Optimization"
-      ]
+      "Physics": ["Gravity", "Thermodynamics", "Relativity", "Quantum"],
+      "Chemistry": ["Bonds", "Reactions", "States", "Catalysis"],
+      "Biology": ["Evolution", "Neural Systems", "Immune Systems", "Ecology"],
+      "Mathematics": ["Algebra", "Geometry", "Topology", "Fractals", "Optimization"]
     },
     "Technology": {
-      "Computation": [
-        "Algorithms",
-        "Parallelism",
-        "Error Correction",
-        "Compression"
-      ],
-      "Engineering": [
-        "Mechanics",
-        "Circuits",
-        "Architecture",
-        "Bioengineering"
-      ],
-      "Systems": [
-        "Networks",
-        "Scaling",
-        "Feedback Loops",
-        "Emergent Complexity"
-      ]
+      "Computation": ["Algorithms", "Parallelism", "Error Correction", "Compression"],
+      "Engineering": ["Mechanics", "Circuits", "Architecture", "Bioengineering"],
+      "Systems": ["Networks", "Scaling", "Feedback Loops", "Emergent Complexity"]
     },
     "Human": {
-      "Psychology": [
-        "Cognition",
-        "Bias",
-        "Emotion",
-        "Drive"
-      ],
-      "Sociology": [
-        "Hierarchy",
-        "Culture",
-        "Influence",
-        "Tribalism"
-      ],
-      "Ethics": [
-        "Morality",
-        "Teleology",
-        "Governance",
-        "Justice"
-      ]
+      "Psychology": ["Cognition", "Bias", "Emotion", "Drive"],
+      "Sociology": ["Hierarchy", "Culture", "Influence", "Tribalism"],
+      "Ethics": ["Morality", "Teleology", "Governance", "Justice"]
     },
     "Creative": {
-      "Language": [
-        "Syntax",
-        "Semantics",
-        "Symbolism",
-        "Persuasion"
-      ],
-      "Art": [
-        "Music",
-        "Visuals",
-        "Storytelling",
-        "Metaphor"
-      ],
-      "Imagination": [
-        "Speculation",
-        "Futurism",
-        "Hypotheticals",
-        "Alien Logic"
-      ]
+      "Language": ["Syntax", "Semantics", "Symbolism", "Persuasion"],
+      "Art": ["Music", "Visuals", "Storytelling", "Metaphor"],
+      "Imagination": ["Speculation", "Futurism", "Hypotheticals", "Alien Logic"]
     }
   }
 }
