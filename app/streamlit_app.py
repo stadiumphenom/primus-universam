@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add repo root to Python path so "engine" can be found
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import streamlit as st
 import json
 import matplotlib.pyplot as plt
