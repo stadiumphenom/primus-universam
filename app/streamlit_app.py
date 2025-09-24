@@ -1,12 +1,11 @@
 import sys
 import os
-
-# Add repo root to Python path so "engine" can be found
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import streamlit as st
 import json
+import streamlit as st
 import matplotlib.pyplot as plt
+
+# Add repo root to path for engine imports
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from engine.galaxy import GalaxyUniverse
 from engine.energy import EnergyPulse
@@ -32,15 +31,26 @@ if st.button("Run Cycles"):
 
     trustmap_history = []
     energy_history = []
+    cycle_log = []
 
     for i in range(num_cycles):
-        recursion.run_cycle()
-        trustmap_history.append(memory.trustmap.copy())
-        energy_history.append(energy.energy)
+        result = recursion.run_cycle()
+        trustmap_history.append(result["trustmap"])
+        energy_history.append(result["remaining_energy"])
+        cycle_log.append(result)
 
-    st.success(f"Completed {num_cycles} pulse cycle(s)!")
+    st.success(f"✅ Completed {num_cycles} pulse cycle(s)!")
 
-    # --- Show Trustmap evolution ---
+    # --- Show Cycle Log ---
+    st.subheader("📜 Cycle Log")
+    for entry in cycle_log:
+        st.write(
+            f"Cycle {entry['cycle']}: "
+            f"{entry['orbit']} → {entry['planet']} → {entry['moon']} "
+            f"(Cost {entry['cost']}, Remaining {entry['remaining_energy']})"
+        )
+
+    # --- Show Trustmap ---
     st.subheader("🧠 Trustmap Evolution")
     if trustmap_history:
         last_map = trustmap_history[-1]
@@ -54,15 +64,15 @@ if st.button("Run Cycles"):
 
         st.pyplot(fig)
 
-    # --- Show Energy over time ---
+    # --- Show Energy ---
     st.subheader("⚡ Energy Usage per Cycle")
     fig2, ax2 = plt.subplots()
     ax2.plot(range(1, len(energy_history) + 1), energy_history, marker="o")
-    ax2.set_title("Energy State After Each Cycle")
+    ax2.set_title("Energy Remaining After Each Cycle")
     ax2.set_xlabel("Cycle")
-    ax2.set_ylabel("Remaining Energy")
+    ax2.set_ylabel("Energy Level")
     st.pyplot(fig2)
 
-    # Show raw trustmap history for debugging
-    with st.expander("Show raw trustmap history"):
+    # Raw debug
+    with st.expander("🔍 Debug: Raw Trustmap History"):
         st.json(trustmap_history)
