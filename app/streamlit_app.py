@@ -53,7 +53,7 @@ if st.button("Reset Universe"):
 
 # --- Load state ---
 state = load_state()
-energy = EnergyPulse(energy=state["energy"])
+energy = EnergyPulse(starting_energy=state["energy"])
 memory = MemorySystem()
 memory.trustmap = state["trustmap"]
 memory.regret_lattice = state["regret_lattice"]
