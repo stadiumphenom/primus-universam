@@ -113,18 +113,36 @@ if st.button("Run Cycles"):
             plt.xticks(rotation=45, ha="right")
             st.pyplot(fig)
 
-    # --- Energy Chart (glyphified) ---
-    st.subheader("⚡ Energy Usage per Cycle")
-    if energy_history:
-        fig2, ax2 = plt.subplots()
-        x_vals = list(range(1, len(energy_history) + 1))
-        glyph_x = [glyph_for_key(f"cycle{x}") for x in x_vals]
-        labels_x = glyph_x if alien_mode else x_vals
-        ax2.plot(labels_x, energy_history, marker="⟶" if alien_mode else "o", linestyle='-')
-        ax2.set_title("Energy Remaining (glyph vs human)")
-        ax2.set_xlabel("Cycle Glyph" if alien_mode else "Cycle")
+    # --- Energy Chart ---
+st.subheader("⚡ Energy Usage per Cycle")
+if energy_history:
+    fig2, ax2 = plt.subplots()
+
+    x_vals = list(range(1, len(energy_history) + 1))
+    y_vals = energy_history
+
+    if alien_mode:
+        # Plot basic line without markers
+        ax2.plot(x_vals, y_vals, linestyle='-', color='cyan')
+
+        # Add alien glyphs as annotations
+        glyphs = ["⟁", "⟠", "⧫", "⟴", "⟁", "⧊", "⫷", "⊛", "⟁", "⋇"]  # looped as needed
+        for i, (x, y) in enumerate(zip(x_vals, y_vals)):
+            glyph = glyphs[i % len(glyphs)]
+            ax2.text(x, y + 1, glyph, ha='center', fontsize=12, color='magenta')
+        
+        ax2.set_title("⟁ Energy Curve")
+        ax2.set_xlabel("Ψ-Cycle")
+        ax2.set_ylabel("≺ Trust ∷")
+    else:
+        # Normal readable mode
+        ax2.plot(x_vals, y_vals, marker="o", linestyle='-', color='blue')
+        ax2.set_title("Energy Remaining After Each Cycle")
+        ax2.set_xlabel("Cycle")
         ax2.set_ylabel("Energy Level")
-        st.pyplot(fig2)
+
+    st.pyplot(fig2)
+
 
     # --- Regret Lattice Display ---
     st.subheader("💔 Regret Lattice")
