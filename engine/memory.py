@@ -10,3 +10,12 @@ class MemorySystem:
     def regret(self, node, reason):
         self.regret_lattice.append((node, reason))
         print(f"- Regret Lattice: {node} → {reason}")
+class MemorySystem:
+    def __init__(self):
+        self.trust_map = {}
+
+    def update_trust(self, key, cost):
+        if key in self.trust_map:
+            self.trust_map[key] += cost
+        else:
+            self.trust_map[key] = cost
