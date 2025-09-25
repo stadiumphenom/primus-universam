@@ -29,7 +29,6 @@ class RecursionEngine:
 
         # update memory trustmap
         key = f"{orbit}:{planet}:{moon}"
-        self.memory.update_trust(key, cost)
 
         # debug output (CLI logs)
         print(f"🌌 Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
