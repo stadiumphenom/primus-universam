@@ -142,7 +142,8 @@ if st.button("Run Cycles"):
         num_planets = sum(1 for p, o in universe.orbits.items() if o == orbit)
         angle_step = 2 * math.pi / max(num_planets, 1)
 
-        for j, planet in enumerate(universe.map["galaxies"][orbit]):
+        orbit_planets = [planet for planet, o in universe.orbits.items() if o == orbit]
+    for j, planet in enumerate(orbit_planets):
             angle = j * angle_step
             px = center[0] + radius * math.cos(angle)
             py = center[1] + radius * math.sin(angle)
