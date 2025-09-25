@@ -1,26 +1,47 @@
 {
-  "core": "Primus",
-  "galaxies": {
-    "Science": {
-      "Physics": ["Gravity", "Thermodynamics", "Relativity", "Quantum"],
-      "Chemistry": ["Bonds", "Reactions", "States", "Catalysis"],
-      "Biology": ["Evolution", "Neural Systems", "Immune Systems", "Ecology"],
-      "Mathematics": ["Algebra", "Geometry", "Topology", "Fractals", "Optimization"]
-    },
-    "Technology": {
-      "Computation": ["Algorithms", "Parallelism", "Error Correction", "Compression"],
-      "Engineering": ["Mechanics", "Circuits", "Architecture", "Bioengineering"],
-      "Systems": ["Networks", "Scaling", "Feedback Loops", "Emergent Complexity"]
-    },
-    "Human": {
-      "Psychology": ["Cognition", "Bias", "Emotion", "Drive"],
-      "Sociology": ["Hierarchy", "Culture", "Influence", "Tribalism"],
-      "Ethics": ["Morality", "Teleology", "Governance", "Justice"]
-    },
-    "Creative": {
-      "Language": ["Syntax", "Semantics", "Symbolism", "Persuasion"],
-      "Art": ["Music", "Visuals", "Storytelling", "Metaphor"],
-      "Imagination": ["Speculation", "Futurism", "Hypotheticals", "Alien Logic"]
-    }
+  "orbits": {
+    "Physics": "Science",
+    "Chemistry": "Science",
+    "Biology": "Science",
+    "Mathematics": "Science",
+    "Computation": "Technology",
+    "Engineering": "Technology",
+    "Systems": "Technology",
+    "Psychology": "Human",
+    "Sociology": "Human",
+    "Ethics": "Human",
+    "Language": "Creative",
+    "Art": "Creative",
+    "Imagination": "Creative"
+  },
+  "planets": {
+    "Physics": {},
+    "Chemistry": {},
+    "Biology": {},
+    "Mathematics": {},
+    "Computation": {},
+    "Engineering": {},
+    "Systems": {},
+    "Psychology": {},
+    "Sociology": {},
+    "Ethics": {},
+    "Language": {},
+    "Art": {},
+    "Imagination": {}
+  },
+  "moons": {
+    "Physics": ["Gravity", "Thermodynamics", "Relativity", "Quantum"],
+    "Chemistry": ["Bonds", "Reactions", "States", "Catalysis"],
+    "Biology": ["Evolution", "Neural Systems", "Immune Systems", "Ecology"],
+    "Mathematics": ["Algebra", "Geometry", "Topology", "Fractals", "Optimization"],
+    "Computation": ["Algorithms", "Parallelism", "Error Correction", "Compression"],
+    "Engineering": ["Mechanics", "Circuits", "Architecture", "Bioengineering"],
+    "Systems": ["Networks", "Scaling", "Feedback Loops", "Emergent Complexity"],
+    "Psychology": ["Cognition", "Bias", "Emotion", "Drive"],
+    "Sociology": ["Hierarchy", "Culture", "Influence", "Tribalism"],
+    "Ethics": ["Morality", "Teleology", "Governance", "Justice"],
+    "Language": ["Syntax", "Semantics", "Symbolism", "Persuasion"],
+    "Art": ["Music", "Visuals", "Storytelling", "Metaphor"],
+    "Imagination": ["Speculation", "Futurism", "Hypotheticals", "Alien Logic"]
   }
 }
