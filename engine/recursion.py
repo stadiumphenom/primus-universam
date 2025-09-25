@@ -1,11 +1,7 @@
 import random
+import traceback
 
 class RecursionEngine:
-    """
-    The recursive driver that runs pulse cycles.
-    It connects GalaxyUniverse, EnergyPulse, and MemorySystem.
-    """
-
     def __init__(self, universe, energy, memory, start_cycle=0):
         self.universe = universe
         self.energy = energy
@@ -13,37 +9,50 @@ class RecursionEngine:
         self.cycle_count = start_cycle
 
     def run_cycle(self):
-        """
-        Run a single recursive pulse cycle:
-        - Selects a biased orbit/planet/moon path
-        - Consumes energy via EnergyPulse
-        - Updates trustmap in memory
-        - Logs regret if energy cost is high
-        """
         self.cycle_count += 1
+        try:
+            # Attempt path selection
+            orbit, planet, moon = self.universe.random_path(trustmap=self.memory.trustmap)
+        except Exception as e:
+            print("⚠️ Error in random_path:", e)
+            print(traceback.format_exc())
+            # fallback to safe default
+            orbit, planet, moon = ("Void", "NoPlanet", "NoMoon")
 
-        # Pick path using trustmap bias
-        orbit, planet, moon = self.universe.random_path(trustmap=self.memory.trustmap)
+        # Energy pulse (safe)
+        try:
+            cost = self.energy.pulse()
+        except Exception as e:
+            print("⚠️ Error in energy.pulse:", e)
+            print(traceback.format_exc())
+            cost = 0
 
-        # Consume energy
-        cost = self.energy.pulse()
-
-        # Generate key
+        # Memory update
         key = f"{orbit}:{planet}:{moon}"
 
-        # Update trust
-        self.memory.update_trust(key, cost)
+        try:
+            self.memory.update_trust(key, cost)
+        except Exception as e:
+            print("⚠️ Error in update_trust:", e)
+            print(traceback.format_exc())
 
-        # Regret condition (example: cost is 9)
-        if cost == 9:
-            self.memory.log_regret(key, reason="High energy spike")
+        # Regret logic (safe)
+        try:
+            if cost >= 9:
+                # Use whichever method exists: log_regret or regret
+                if hasattr(self.memory, "log_regret"):
+                    self.memory.log_regret(key, "High energy spike")
+                elif hasattr(self.memory, "regret"):
+                    self.memory.regret(key, "High energy spike")
+        except Exception as e:
+            print("⚠️ Error in regret logging:", e)
+            print(traceback.format_exc())
 
         # Debug
-        print(f"🌌 Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
-        print(f"⚡ Energy cost: {cost} | Remaining: {self.energy.energy}")
-        print(f"🧠 Trust updated: {key} +{cost}")
-        print("-" * 40)
+        print(f"Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
+        print(f"Cost: {cost}, Remaining: {self.energy.energy}")
 
+        # Build result
         return {
             "cycle": self.cycle_count,
             "orbit": orbit,
