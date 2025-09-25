@@ -114,27 +114,34 @@ if st.button("Run Cycles"):
             st.pyplot(fig)
 
     # --- Energy Chart ---
-st.subheader("⚡ Energy Usage per Cycle")
-if energy_history:
+if "energy_history" in locals() and energy_history:
+    st.subheader("⚡ Energy Usage per Cycle")
     fig2, ax2 = plt.subplots()
 
     x_vals = list(range(1, len(energy_history) + 1))
     y_vals = energy_history
 
     if alien_mode:
-        # Plot basic line without markers
+        # Alien-styled energy chart
         ax2.plot(x_vals, y_vals, linestyle='-', color='cyan')
 
-        # Add alien glyphs as annotations
-        glyphs = ["⟁", "⟠", "⧫", "⟴", "⟁", "⧊", "⫷", "⊛", "⟁", "⋇"]  # looped as needed
+        glyphs = ["⟁", "⟠", "⧫", "⟴", "⟁", "⧊", "⫷", "⊛", "⟁", "⋇"]
         for i, (x, y) in enumerate(zip(x_vals, y_vals)):
             glyph = glyphs[i % len(glyphs)]
             ax2.text(x, y + 1, glyph, ha='center', fontsize=12, color='magenta')
-        
+
         ax2.set_title("⟁ Energy Curve")
         ax2.set_xlabel("Ψ-Cycle")
         ax2.set_ylabel("≺ Trust ∷")
     else:
+        # Normal chart
+        ax2.plot(x_vals, y_vals, marker="o", linestyle='-', color='blue')
+        ax2.set_title("Energy Remaining After Each Cycle")
+        ax2.set_xlabel("Cycle")
+        ax2.set_ylabel("Energy Level")
+
+    st.pyplot(fig2)
+
         # Normal readable mode
         ax2.plot(x_vals, y_vals, marker="o", linestyle='-', color='blue')
         ax2.set_title("Energy Remaining After Each Cycle")
