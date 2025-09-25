@@ -3,7 +3,7 @@ import os
 import json
 import streamlit as st
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+import networkx as nx
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -21,7 +21,12 @@ def load_state():
                 return json.load(f)
         except json.JSONDecodeError:
             pass
-    return {"energy": 100, "trustmap": {}, "regret_lattice": [], "cycle_count": 0}
+    return {
+        "energy": 100,
+        "trustmap": {},
+        "regret_lattice": [],
+        "cycle_count": 0
+    }
 
 def save_state(energy, trustmap, regret_lattice, cycle_count):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -46,9 +51,9 @@ def intent_color(value):
     return "red"
 
 st.title("🌌 Primus-Universum")
-st.write("A self-evolving cognitive universe. Run recursive pulse cycles below:")
+st.write("A self‑evolving cognitive universe. Glyphic mode: alien symbology.")
 
-alien_mode = st.toggle("👽 Alien Mode", value=True)
+alien_mode = st.checkbox("Alien Mode", value=True)
 num_cycles = st.number_input("Number of pulse cycles", min_value=1, max_value=50, value=1)
 if st.button("Reset Universe"):
     if os.path.exists(STATE_FILE):
@@ -56,11 +61,11 @@ if st.button("Reset Universe"):
     st.rerun()
 
 state = load_state()
-energy = EnergyPulse(starting_energy=state["energy"])
+energy = EnergyPulse(starting_energy=state.get("energy", 100))
 memory = MemorySystem()
-memory.trustmap = state["trustmap"]
-memory.regret_lattice = state["regret_lattice"]
-cycle_offset = state["cycle_count"]
+memory.trustmap = state.get("trustmap", {})
+memory.regret_lattice = state.get("regret_lattice", [])
+cycle_offset = state.get("cycle_count", 0)
 
 with open("data/genesis_map.json", "r", encoding="utf-8") as f:
     genesis = json.load(f)
@@ -74,52 +79,78 @@ if st.button("Run Cycles"):
 
     for _ in range(num_cycles):
         result = recursion.run_cycle()
-        trustmap_history.append(result["trustmap"])
-        energy_history.append(result["remaining_energy"])
+        trustmap_history.append(result.get("trustmap", {}))
+        energy_history.append(result.get("remaining_energy", 0))
         cycle_log.append(result)
 
     save_state(energy.energy, memory.trustmap, memory.regret_lattice, recursion.cycle_count)
 
-    st.success(f"✅ Completed {num_cycles} pulse cycle(s)")
+    st.success(f"✅ Completed {num_cycles} cycles")
 
+    # --- Cycle Log ---
     st.subheader("📜 Cycle Log")
     for entry in cycle_log:
         st.write(
             f"Cycle {entry['cycle']}: {entry['orbit']} → {entry['planet']} → {entry['moon']} "
-            f"(Cost {entry['cost']}, Remaining {entry['remaining_energy']})"
+            f"(Cost {entry['cost']}, Rem {entry['remaining_energy']})"
         )
 
+    # --- Trustmap Chart ---
     st.subheader("🧠 Trustmap Evolution")
     if trustmap_history and isinstance(trustmap_history[-1], dict):
         final_map = trustmap_history[-1]
         if final_map:
             labels = list(final_map.keys())
-            values = list(final_map.values())
+            values = [final_map[k] for k in labels]
             glyph_labels = [glyph_for_key(k) for k in labels]
+            bar_labels = glyph_labels if alien_mode else labels
             colors = [intent_color(v) for v in values]
 
             fig, ax = plt.subplots()
-            ax.bar(glyph_labels if alien_mode else labels, values, color=colors)
+            ax.bar(bar_labels, values, color=colors)
             ax.set_title("⟴ Final Trustmap" if alien_mode else "Trustmap after final cycle")
             ax.set_ylabel("⋖ Trust ∴" if alien_mode else "Trust Value")
             plt.xticks(rotation=45, ha="right")
             st.pyplot(fig)
 
+    # --- Energy Chart (glyphified) ---
     st.subheader("⚡ Energy Usage per Cycle")
     if energy_history:
         fig2, ax2 = plt.subplots()
-        ax2.plot(range(1, len(energy_history) + 1), energy_history, marker="o")
-        ax2.set_title("Energy Remaining After Each Cycle")
-        ax2.set_xlabel("Cycle")
+        x_vals = list(range(1, len(energy_history) + 1))
+        glyph_x = [glyph_for_key(f"cycle{x}") for x in x_vals]
+        labels_x = glyph_x if alien_mode else x_vals
+        ax2.plot(labels_x, energy_history, marker="⟶" if alien_mode else "o", linestyle='-')
+        ax2.set_title("Energy Remaining (glyph vs human)")
+        ax2.set_xlabel("Cycle Glyph" if alien_mode else "Cycle")
         ax2.set_ylabel("Energy Level")
         st.pyplot(fig2)
 
+    # --- Regret Lattice Display ---
     st.subheader("💔 Regret Lattice")
     if memory.regret_lattice:
-        for regret in memory.regret_lattice:
-            st.write(f"{glyph_for_key(regret[0]) if alien_mode else regret[0]} → {regret[1]}")
+        for (n, r) in memory.regret_lattice:
+            label = glyph_for_key(n) if alien_mode else n
+            st.write(f"{label} → {r}")
     else:
-        st.info("No regrets yet. The universe is young.")
+        st.info("No regrets yet.")
 
-    with st.expander("🔍 Debug: Raw Trustmap"):
+    # --- Universe Graph (network) ---
+    st.subheader("🪐 Universe Map (orbits → planets → moons)")
+    G = nx.DiGraph()
+    # Build graph edges
+    for planet, moons in universe.moons.items():
+        orbit = universe.orbits.get(planet, "?")
+        G.add_edge(orbit, planet)
+        for moon in moons:
+            G.add_edge(planet, moon)
+    # Node labels: glyph or readable
+    node_labels = {node: (glyph_for_key(node) if alien_mode else node) for node in G.nodes()}
+    pos = nx.spring_layout(G, seed=42)
+    fig3, ax3 = plt.subplots(figsize=(6, 6))
+    nx.draw(G, pos, labels=node_labels, with_labels=True, node_size=800, node_color="lightblue", font_size=10, font_family="monospace")
+    st.pyplot(fig3)
+
+    # --- Debug expand ---
+    with st.expander("🔍 Debug: Trustmap"):
         st.json(memory.trustmap)
