@@ -4,11 +4,9 @@ class MemorySystem:
         self.regret_lattice = []
 
     def update_trust(self, key, value):
-        """Reinforce trust in a path/decision."""
         self.trustmap[key] = self.trustmap.get(key, 0) + value
         print(f"- Trustmap Updated: {key} +{value}")
 
-    def log_regret(self, key, reason):
-        """Log regret for a poor decision."""
+    def regret(self, key, reason):  # <-- renamed from log_regret
         self.regret_lattice.append((key, reason))
         print(f"- Regret Lattice: {key} → {reason}")
