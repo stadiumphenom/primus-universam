@@ -133,7 +133,7 @@ if st.button("Run Cycles"):
     fig3, ax3 = plt.subplots(figsize=(8, 8))
     center = (0, 0)
     radii = {}
-    orbit_names = list(universe.map["galaxies"].keys())
+    orbit_names = list(set(universe.orbits.values()))
     num_orbits = len(orbit_names)
 
     for i, orbit in enumerate(orbit_names):
