@@ -15,25 +15,28 @@ class RecursionEngine:
     def run_cycle(self):
         """
         Run a single recursive pulse cycle:
-        - Selects a random orbit/planet/moon
+        - Selects a biased orbit/planet/moon path
         - Consumes energy via EnergyPulse
         - Updates trustmap in memory
+        - Logs regret if energy cost is high
         """
         self.cycle_count += 1
 
-        # pick random orbit -> planet -> moon
-        orbit, planet, moon = self.universe.random_path()
+        # Pick path using trustmap bias
+        orbit, planet, moon = self.universe.random_path(trustmap=self.memory.trustmap)
 
-        # consume energy
+        # Consume energy
         cost = self.energy.pulse()
 
-        # update memory trustmap
+        # Generate key
         key = f"{orbit}:{planet}:{moon}"
+
+        # Update trust
         self.memory.update_trust(key, cost)
 
-        # optionally add regret
-        if cost >= 9:
-            self.memory.regret(key, reason="High energy spike")
+        # Regret condition (example: cost is 9)
+        if cost == 9:
+            self.memory.log_regret(key, reason="High energy spike")
 
         # Debug
         print(f"🌌 Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
