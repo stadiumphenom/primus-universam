@@ -1,4 +1,3 @@
-import random
 import traceback
 
 class RecursionEngine:
@@ -10,49 +9,41 @@ class RecursionEngine:
 
     def run_cycle(self):
         self.cycle_count += 1
+
+        # Select path
         try:
-            # Attempt path selection
             orbit, planet, moon = self.universe.random_path(trustmap=self.memory.trustmap)
         except Exception as e:
-            print("⚠️ Error in random_path:", e)
+            print("⚠️ random_path error:", e)
             print(traceback.format_exc())
-            # fallback to safe default
-            orbit, planet, moon = ("Void", "NoPlanet", "NoMoon")
+            orbit, planet, moon = "Void", "NoPlanet", "NoMoon"
 
-        # Energy pulse (safe)
+        # Pulse energy
         try:
             cost = self.energy.pulse()
         except Exception as e:
-            print("⚠️ Error in energy.pulse:", e)
+            print("⚠️ pulse error:", e)
             print(traceback.format_exc())
             cost = 0
 
-        # Memory update
         key = f"{orbit}:{planet}:{moon}"
-
+        # Update trust
         try:
             self.memory.update_trust(key, cost)
         except Exception as e:
-            print("⚠️ Error in update_trust:", e)
+            print("⚠️ update_trust error:", e)
             print(traceback.format_exc())
 
-        # Regret logic (safe)
+        # Regret logic
         try:
-            if cost >= 9:
-                # Use whichever method exists: log_regret or regret
-                if hasattr(self.memory, "log_regret"):
-                    self.memory.log_regret(key, "High energy spike")
-                elif hasattr(self.memory, "regret"):
-                    self.memory.regret(key, "High energy spike")
+            if cost >= 9 and hasattr(self.memory, "log_regret"):
+                self.memory.log_regret(key, reason="High energy spike")
         except Exception as e:
-            print("⚠️ Error in regret logging:", e)
+            print("⚠️ regret logging error:", e)
             print(traceback.format_exc())
 
-        # Debug
-        print(f"Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
-        print(f"Cost: {cost}, Remaining: {self.energy.energy}")
+        print(f"Cycle {self.cycle_count}: {orbit}:{planet}:{moon} (cost {cost}, rem {self.energy.energy})")
 
-        # Build result
         return {
             "cycle": self.cycle_count,
             "orbit": orbit,
