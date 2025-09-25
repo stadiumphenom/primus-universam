@@ -14,8 +14,5 @@ class MemorySystem:
     def __init__(self):
         self.trust_map = {}
 
-    def update_trust(self, key, cost):
-        if key in self.trust_map:
-            self.trust_map[key] += cost
-        else:
-            self.trust_map[key] = cost
+    def update_trust(self, key, value):
+    self.trustmap[key] = self.trustmap.get(key, 0) + value
