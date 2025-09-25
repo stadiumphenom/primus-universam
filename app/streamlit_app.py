@@ -12,85 +12,96 @@ from engine.energy import EnergyPulse
 from engine.recursion import RecursionEngine
 from engine.memory import MemorySystem
 
-# Load Genesis Map
-with open("data/genesis_map.json", "r", encoding="utf-8") as f:
-    genesis = json.load(f)
+# --- Constants ---
+STATE_FILE = "data/state.json"
 
-# File path for persistent state
-state_path = "data/state.json"
+# --- Helper: Load state ---
+def load_state():
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            pass
+    return {
+        "energy": 100,
+        "trustmap": {},
+        "regret_lattice": [],
+        "cycle_count": 0
+    }
 
-# Load saved state if available
-saved_state = {}
-if os.path.exists(state_path):
-    with open(state_path, "r", encoding="utf-8") as f:
-        saved_state = json.load(f)
+# --- Helper: Save state ---
+def save_state(energy, trustmap, regret_lattice, cycle_count):
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump({
+            "energy": energy,
+            "trustmap": trustmap,
+            "regret_lattice": regret_lattice,
+            "cycle_count": cycle_count
+        }, f, indent=2)
 
-# Initialize systems
-universe = GalaxyUniverse(genesis)
-energy = EnergyPulse()
-memory = MemorySystem()
-
-# Restore saved values
-energy.energy = saved_state.get("energy", 100)
-memory.trustmap = saved_state.get("trustmap", {})
-memory.regret_lattice = saved_state.get("regret_lattice", [])
-
-# Streamlit UI
+# --- UI ---
 st.title("🌌 Primus-Universum")
 st.write("A self-evolving cognitive universe. Run recursive pulse cycles below:")
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    num_cycles = st.number_input("Number of pulse cycles", min_value=1, max_value=50, value=1)
-with col2:
-    if st.button("🔄 Reset Universe"):
-        energy.energy = 100
-        memory.trustmap = {}
-        memory.regret_lattice = []
-        if os.path.exists(state_path):
-            os.remove(state_path)
-        st.warning("Universe state has been reset.")
-        st.stop()
+# --- Controls ---
+num_cycles = st.number_input("Number of pulse cycles", min_value=1, max_value=50, value=1)
+if st.button("Reset Universe"):
+    if os.path.exists(STATE_FILE):
+        os.remove(STATE_FILE)
+    st.experimental_rerun()
 
+# --- Load state ---
+state = load_state()
+energy = EnergyPulse(energy=state["energy"])
+memory = MemorySystem()
+memory.trustmap = state["trustmap"]
+memory.regret_lattice = state["regret_lattice"]
+cycle_offset = state["cycle_count"]
+
+# --- Load genesis map ---
+with open("data/genesis_map.json", "r", encoding="utf-8") as f:
+    genesis = json.load(f)
+universe = GalaxyUniverse(genesis)
+recursion = RecursionEngine(universe, energy, memory, start_cycle=cycle_offset)
+
+# --- Run Cycles ---
 if st.button("Run Cycles"):
-    recursion = RecursionEngine(universe, energy, memory)
-
     trustmap_history = []
     energy_history = []
     cycle_log = []
 
-    for i in range(num_cycles):
+    for _ in range(num_cycles):
         result = recursion.run_cycle()
-        trustmap_history.append(result.get("trustmap", {}))
-        energy_history.append(result.get("remaining_energy", 0))
+        trustmap_history.append(result["trustmap"])
+        energy_history.append(result["remaining_energy"])
         cycle_log.append(result)
 
-    st.success(f"✅ Completed {num_cycles} pulse cycle(s)!")
+    # Save updated state
+    save_state(
+        energy.energy,
+        memory.trustmap,
+        memory.regret_lattice,
+        recursion.cycle_count
+    )
 
-    # Save new state
-    with open(state_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "energy": energy.energy,
-            "trustmap": memory.trustmap,
-            "regret_lattice": memory.regret_lattice
-        }, f, indent=2)
+    st.success(f"✅ Completed {num_cycles} pulse cycle(s)")
 
     # --- Cycle Log ---
     st.subheader("📜 Cycle Log")
     for entry in cycle_log:
         st.write(
-            f"Cycle {entry.get('cycle', '?')}: "
-            f"{entry.get('orbit', '?')} → {entry.get('planet', '?')} → {entry.get('moon', '?')} "
-            f"(Cost {entry.get('cost', '?')}, Remaining {entry.get('remaining_energy', '?')})"
+            f"Cycle {entry['cycle']}: "
+            f"{entry['orbit']} → {entry['planet']} → {entry['moon']} "
+            f"(Cost {entry['cost']}, Remaining {entry['remaining_energy']})"
         )
 
-    # --- Trustmap ---
+    # --- Trustmap Chart ---
     st.subheader("🧠 Trustmap Evolution")
     if trustmap_history and isinstance(trustmap_history[-1], dict):
-        last_map = trustmap_history[-1]
-        if last_map:
-            labels, values = zip(*last_map.items())
-
+        final_map = trustmap_history[-1]
+        if final_map:
+            labels, values = zip(*final_map.items())
             fig, ax = plt.subplots()
             ax.bar(labels, values)
             ax.set_title("Trustmap after final cycle")
@@ -109,13 +120,13 @@ if st.button("Run Cycles"):
         st.pyplot(fig2)
 
     # --- Regret Lattice ---
-    st.subheader("🧩 Regret Lattice")
+    st.subheader("💔 Regret Lattice")
     if memory.regret_lattice:
-        for node, reason in memory.regret_lattice:
-            st.write(f"🔻 {node} → {reason}")
+        for regret in memory.regret_lattice:
+            st.write(f"{regret[0]} → {regret[1]}")
     else:
-        st.write("No regrets recorded yet.")
+        st.info("No regrets yet. The universe is young.")
 
-    # --- Raw Debug ---
-    with st.expander("🔍 Debug: Raw Trustmap History"):
-        st.json(trustmap_history)
+    # --- Debug ---
+    with st.expander("🔍 Debug: Raw Trustmap"):
+        st.json(memory.trustmap)
