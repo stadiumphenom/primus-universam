@@ -16,17 +16,31 @@ from engine.memory import MemorySystem
 with open("data/genesis_map.json", "r", encoding="utf-8") as f:
     genesis = json.load(f)
 
-st.title("\U0001F30C Primus-Universum")
+# 🔄 Try to load persistent state
+state_path = "data/state.json"
+saved_state = {}
+if os.path.exists(state_path):
+    with open(state_path, "r", encoding="utf-8") as f:
+        saved_state = json.load(f)
+
+# Initialize systems
+universe = GalaxyUniverse(genesis)
+energy = EnergyPulse()
+memory = MemorySystem()
+
+# Restore saved trustmap and energy
+memory.trustmap = saved_state.get("trustmap", {})
+memory.regret_lattice = saved_state.get("regret_lattice", [])
+energy.energy = saved_state.get("energy", 100)
+
+# Start Streamlit UI
+st.title("🌌 Primus-Universum")
 st.write("A self-evolving cognitive universe. Run recursive pulse cycles below:")
 
 # Input cycles
 num_cycles = st.number_input("Number of pulse cycles", min_value=1, max_value=50, value=1)
 
 if st.button("Run Cycles"):
-    # Initialize systems
-    universe = GalaxyUniverse(genesis)
-    energy = EnergyPulse()
-    memory = MemorySystem()
     recursion = RecursionEngine(universe, energy, memory)
 
     trustmap_history = []
