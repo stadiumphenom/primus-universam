@@ -49,7 +49,7 @@ num_cycles = st.number_input("Number of pulse cycles", min_value=1, max_value=50
 if st.button("Reset Universe"):
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Load state ---
 state = load_state()
