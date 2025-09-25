@@ -1,6 +1,4 @@
 import random
-import json
-import os
 
 class RecursionEngine:
     """
@@ -8,41 +6,34 @@ class RecursionEngine:
     It connects GalaxyUniverse, EnergyPulse, and MemorySystem.
     """
 
-    def __init__(self, universe, energy, memory):
+    def __init__(self, universe, energy, memory, start_cycle=0):
         self.universe = universe
         self.energy = energy
         self.memory = memory
-        self.cycle_count = 0
-        self.state_path = "data/state.json"
+        self.cycle_count = start_cycle
 
     def run_cycle(self):
         """
         Run a single recursive pulse cycle:
-        - Selects a weighted orbit/planet/moon based on trustmap
-        - Consumes energy
-        - Updates trust or regret
-        - Persists state
+        - Selects a random orbit/planet/moon
+        - Consumes energy via EnergyPulse
+        - Updates trustmap in memory
         """
         self.cycle_count += 1
 
-        # Use trustmap to bias selection
-        trustmap = self.memory.trustmap
-        orbit, planet, moon = self.universe.random_path(trustmap)
+        # pick random orbit -> planet -> moon
+        orbit, planet, moon = self.universe.random_path()
 
-        # Energy cost
+        # consume energy
         cost = self.energy.pulse()
 
-        # Build unique key
+        # update memory trustmap
         key = f"{orbit}:{planet}:{moon}"
+        self.memory.update_trust(key, cost)
 
-        # Trust or regret based on cost
-        if cost > 7:
-            self.memory.regret(key, f"High cost: {cost}")
-        else:
-            self.memory.update_trust(key, cost)
-
-        # Save updated state
-        self.save_state()
+        # optionally add regret
+        if cost >= 9:
+            self.memory.regret(key, reason="High energy spike")
 
         # Debug
         print(f"🌌 Cycle {self.cycle_count}: {orbit} → {planet} → {moon}")
@@ -59,13 +50,3 @@ class RecursionEngine:
             "remaining_energy": self.energy.energy,
             "trustmap": dict(self.memory.trustmap)
         }
-
-    def save_state(self):
-        state = {
-            "trustmap": self.memory.trustmap,
-            "regret_lattice": self.memory.regret_lattice,
-            "energy": self.energy.energy
-        }
-        os.makedirs(os.path.dirname(self.state_path), exist_ok=True)
-        with open(self.state_path, "w") as f:
-            json.dump(state, f, indent=2)
