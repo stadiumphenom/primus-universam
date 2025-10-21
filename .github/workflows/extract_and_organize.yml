@@ -1,48 +1,30 @@
-# File: scripts/extract_and_organize.py
-import os
-import zipfile
-import shutil
-from pathlib import Path
+# File: .github/workflows/extract-and-organize.yml
 
-UPLOADS_DIR = Path("uploads")
-TARGET_DIR = Path(".")  # Root of your project
+name: Extract and Organize Uploads
 
-# Ensure directories exist before moving files
-for sub in ["engine", "data", "docs", "uploads"]:
-    os.makedirs(sub, exist_ok=True)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'uploads/*.zip'
 
-# Define accepted file types and destination rules
-MOVE_RULES = {
-    ".ts": "engine",
-    ".json": "data",
-    ".md": "docs",
-}
+jobs:
+  extract:
+    runs-on: ubuntu-latest
 
-def extract_zip_to_temp(zip_path: Path) -> Path:
-    temp_dir = zip_path.with_suffix("")
-    with zipfile.ZipFile(zip_path, 'r') as z:
-        z.extractall(temp_dir)
-    return temp_dir
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-def move_files(source_dir: Path):
-    for root, _, files in os.walk(source_dir):
-        for file in files:
-            ext = Path(file).suffix
-            if ext in MOVE_RULES:
-                target_subdir = TARGET_DIR / MOVE_RULES[ext]
-                target_subdir.mkdir(parents=True, exist_ok=True)
-                src = Path(root) / file
-                dst = target_subdir / file
-                shutil.move(str(src), str(dst))
-                print(f"Moved: {file} → {dst}")
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-def main():
-    for zip_file in UPLOADS_DIR.glob("*.zip"):
-        print(f"Extracting: {zip_file.name}")
-        temp_path = extract_zip_to_temp(zip_file)
-        move_files(temp_path)
-        print(f"Clean up: {temp_path}")
-        shutil.rmtree(temp_path, ignore_errors=True)
+      - name: Ensure expected folders exist
+        run: |
+          mkdir -p engine data docs uploads
 
-if __name__ == "__main__":
-    main()
+      - name: Run Extract and Organize Script
+        run: |
+          python scripts/extract_and_organize.py
