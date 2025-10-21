@@ -25,6 +25,6 @@ jobs:
         run: |
           mkdir -p engine data docs uploads
 
-      - name: Run Extract and Organize Script
+      - name: Run Extract and Organize Python Script
         run: |
-          .github/workflows/extract-and-organize.yml
+          python scripts/extract_and_organize.py
