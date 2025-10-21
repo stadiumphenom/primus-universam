@@ -1,0 +1,27 @@
+# File: .github/workflows/extract-and-organize.yml
+
+name: Extract and Organize Uploads
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'uploads/*.zip'
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Extract and Organize Script
+        run: |
+          pip install -r requirements.txt || true
+          python scripts/extract_and_organize.py
