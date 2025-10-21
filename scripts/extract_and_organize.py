@@ -1,0 +1,48 @@
+# File: scripts/extract_and_organize.py
+import os
+import zipfile
+import shutil
+from pathlib import Path
+
+UPLOADS_DIR = Path("uploads")
+TARGET_DIR = Path(".")
+
+# Ensure necessary folders exist
+for sub in ["engine", "data", "docs", "uploads"]:
+    os.makedirs(sub, exist_ok=True)
+
+MOVE_RULES = {
+    ".ts": "engine",
+    ".json": "data",
+    ".md": "docs",
+}
+
+def extract_zip_to_temp(zip_path: Path) -> Path:
+    temp_dir = zip_path.with_suffix("")
+    with zipfile.ZipFile(zip_path, 'r') as z:
+        z.extractall(temp_dir)
+    return temp_dir
+
+def move_files(source_dir: Path):
+    for root, _, files in os.walk(source_dir):
+        for file in files:
+            ext = Path(file).suffix
+            if ext in MOVE_RULES:
+                dest_dir = TARGET_DIR / MOVE_RULES[ext]
+                dest_dir.mkdir(parents=True, exist_ok=True)
+                src = Path(root) / file
+                dst = dest_dir / file
+                shutil.move(str(src), str(dst))
+                print(f"Moved: {file} → {dst}")
+
+def main():
+    for zip_file in UPLOADS_DIR.glob("*.zip"):
+        print(f"Extracting: {zip_file.name}")
+        temp_path = extract_zip_to_temp(zip_file)
+        move_files(temp_path)
+        print(f"Clean up: {temp_path}")
+        shutil.rmtree(temp_path, ignore_errors=True)
+
+if __name__ == "__main__":
+    main()
+
