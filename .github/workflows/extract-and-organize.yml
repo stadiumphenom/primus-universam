@@ -1,27 +1,52 @@
-# File: .github/workflows/extract-and-organize.yml
+# File: scripts/extract_and_organize.py
+import os
+import zipfile
+import shutil
+from pathlib import Path
 
-name: Extract and Organize Uploads
+UPLOADS_DIR = Path("/mnt/data")
+TARGET_DIR = Path(".")  # Root of your project
 
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - 'uploads/*.zip'
+# Ensure directories exist before moving files
+for sub in ["engine", "data", "docs", "uploads"]:
+    os.makedirs(sub, exist_ok=True)
 
-jobs:
-  extract:
-    runs-on: ubuntu-latest
+# Define accepted file types and destination rules
+MOVE_RULES = {
+    ".ts": "engine",
+    ".json": "data",
+    ".md": "docs",
+}
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+def extract_zip_to_temp(zip_path: Path) -> Path:
+    temp_dir = zip_path.with_suffix("")
+    with zipfile.ZipFile(zip_path, 'r') as z:
+        z.extractall(temp_dir)
+    return temp_dir
 
-      - name: Run Extract and Organize Script
-        run: |
-          pip install -r requirements.txt || true
-          python scripts/extract_and_organize.py
+
+def move_files(source_dir: Path):
+    for root, _, files in os.walk(source_dir):
+        for file in files:
+            ext = Path(file).suffix
+            if ext in MOVE_RULES:
+                target_subdir = TARGET_DIR / MOVE_RULES[ext]
+                target_subdir.mkdir(parents=True, exist_ok=True)
+                src = Path(root) / file
+                dst = target_subdir / file
+                shutil.move(str(src), str(dst))
+                print(f"Moved: {file} → {dst}")
+
+
+def main():
+    for zip_file in UPLOADS_DIR.glob("*.zip"):
+        print(f"Extracting: {zip_file.name}")
+        temp_path = extract_zip_to_temp(zip_file)
+        move_files(temp_path)
+        print(f"Clean up: {temp_path}")
+        shutil.rmtree(temp_path, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    main()
