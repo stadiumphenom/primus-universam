@@ -27,4 +27,4 @@ jobs:
 
       - name: Run Extract and Organize Script
         run: |
-          python scripts/extract_and_organize.py
+          python scripts/extract_and_organize.yml
